@@ -41,7 +41,7 @@ INSTALLED_APPS = [
         # The following apps are required:
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
+    'allauth.socialaccount', # required without social being installed
 ]
 
 MIDDLEWARE = [
