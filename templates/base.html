@@ -127,10 +127,30 @@
     </header>
 
     {% if messages %}
-    <div class="message-container"></div>
+    <div class="message-container">
+      {% for message in messages %}
+          {% with message.level as level%}
+            {% if level == 40 %}
+              {% include "includes/toasts/toast_error.html" %}
+            {% elif level == 30  %}
+              {% include "includes/toasts/toast_warning.html" %}
+            {% elif level == 25  %}
+              {% include "includes/toasts/toast_success.html" %}
+            {% else %}
+              {% include "includes/toasts/toast_info.html" %}
+            {% endif %}
+          {% endwith %}
+        {% include "includes/toasts/toast_success.html" %}
+      {% endfor %}
+    </div>
     {% endif %} {% block pageheader %} {% endblock pageheader %} 
-    {% block content %} {% endblock content %} {% block postloadjs %}
-     {% endblock postloadjs %}
+    {% block content %} {% endblock content %} 
+    
+    {% block postloadjs %}
+      <script type="text/javascript">
+        $('.toast').toast('show');
+      </script>
+    {% endblock postloadjs %}
 
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--

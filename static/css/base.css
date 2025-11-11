@@ -37,18 +37,25 @@ body {
     background: black;
     color: white;
 }
-.btn-outline-black{
+
+.btn-outline-black {
     background: white;
-    color: #000 !important;
+    color: black !important; /* use important to override link colors for <a> elements */
     border: 1px solid black;
 }
+.btn-outline-black:hover,
+.btn-outline-black:active,
+.btn-outline-black:focus {
+    background: black;
+    color: white !important;
+}
+
 .shop-now-button:hover,
 .shop-now-button:active,
 .shop-now-button:focus,
 .btn-black:hover,
 .btn-black:active,
-.btn-black:focus,
-.btn-outline-black:focus {
+.btn-black:focus {
     background: #222;
     color: white;
 }
@@ -80,7 +87,7 @@ a.category-badge > span.badge:hover {
     color: #fff !important;
 }
 
-.btt-button{
+.btt-button {
     height: 42px;
     width: 42px;
     position: fixed;
@@ -88,9 +95,29 @@ a.category-badge > span.badge:hover {
     right: 10px;
 }
 
-.btt-link{
+.btt-link,
+.update-link,
+.remove-item {
     cursor: pointer;
 }
+
+/* ------------------------------- bootstrap toasts */
+
+.message-container {
+    position: fixed;
+    top: 72px;
+    right: 15px;
+    z-index: 99999999999;
+}
+
+.custom-toast {
+    overflow: visible;
+}
+
+.toast-capper {
+    height: 2px;
+}
+
 
 /* -------------------------------- Media Queries */
 
