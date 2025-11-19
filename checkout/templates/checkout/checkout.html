@@ -5,6 +5,10 @@
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'checkout/css/checkout.css'  %}">
 {% endblock extra_css %}
+{% block extrajs %}
+
+{% endblock extrajs %}
+
 
 {% block pageheader %}
     <div class="container header-container">
@@ -103,9 +107,10 @@
                     </fieldset>
                     <fieldset class="px-3">
                         <legend class="fieldset-label small text-black px-2 w-auto">Payment</legend>
-                        {% comment %} Stripe payment element goes here {% endcomment %}
-                        <div class="mb-3" id="card-element"></div>
-                        {% comment %} used to display form errors {% endcomment %}
+                        {% comment %} Stripe Payment Element mount point {% endcomment %}
+                        <div id="payment-element">
+                            <!-- Stripe Payment Element will be inserted here -->
+                        </div>
                         <div class="mb-3 text-danger" id="card-errors" role="alert"></div>
                     </fieldset>
                     <div class="submit-button text-right mt-5 mb-2">
@@ -134,3 +139,9 @@
     </div>
 {% endblock %}
 
+{% block postloadjs %}
+    {{block.super}}
+    {{stripe_public_key|json_script:"id_stripe_public_key"}}
+    {{client_secret|json_script:"id_client_secret"}}
+    <script src="{% static 'checkout/js/stripe_elements.js' %}"></script>
+{% endblock postloadjs %}

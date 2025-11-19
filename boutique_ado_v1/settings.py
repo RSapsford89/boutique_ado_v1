@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+if os.path.isfile('env.py'):
+    import env
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1j(r3(ew#lp!be*9r^!&17$625wz5!()hx@i6!6gdmuj9_gb)8'
-
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY','')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY','')
+STRIPE_CURRENCY = 'gbp'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

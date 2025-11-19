@@ -10,7 +10,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    {% endblock %} {% block extrameta %}{% endblock extrameta %} 
+    {% endblock %}
+    {% block extrameta %}{% endblock extrameta %} 
     {% block extracss %}{% endblock extracss %}
     {% block corecss %}
     <link rel="stylesheet" href="{%static 'css/base.css'%}">
@@ -31,7 +32,10 @@
       integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
       crossorigin="anonymous"
     ></script>
-    {% endblock corejs %} {% block extrajs %}{% endblock extrajs %}
+    {% comment %} stripe payment {% endcomment %}
+    <script src="https://js.stripe.com/clover/stripe.js"></script>
+    {% endblock corejs %}
+    {% block extrajs %}{% endblock extrajs %}
 
     <title>
       Boutique Ado {% block extra-title %}{% endblock extra-title %}

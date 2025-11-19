@@ -1,0 +1,89 @@
+/*
+    Core logic/payment flow for this comes from here:
+    https://stripe.com/docs/payments/accept-a-payment
+    
+    Using Stripe Payment Element:
+    https://stripe.com/docs/payments/payment-element
+*/
+
+var stripePublicKey = $('#id_stripe_public_key').text().slice(1, -1);
+var clientSecret = $('#id_client_secret').text().slice(1, -1);
+var stripe = Stripe(stripePublicKey);
+
+// Initialize Elements with clientSecret
+const elements = stripe.elements({
+    clientSecret: clientSecret,
+    appearance: {
+        theme: 'stripe',
+        variables: {
+            colorPrimary: '#000000',
+            colorBackground: '#ffffff',
+            colorText: '#000000',
+            colorDanger: '#dc3545',
+            fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
+            spacingUnit: '4px',
+            borderRadius: '4px'
+        }
+    }
+});
+
+// Create and mount the Payment Element
+const paymentElement = elements.create('payment', {
+    layout: 'accordion'
+});
+paymentElement.mount('#payment-element');
+
+// Handle realtime validation errors on the payment element
+paymentElement.on('change', function(event) {
+    var errorDiv = document.getElementById('card-errors');
+    if (event.error) {
+        var html = `
+            <span class="icon" role="alert">
+                <i class="fas fa-times"></i>
+            </span>
+            <span>${event.error.message}</span>
+        `;
+        $(errorDiv).html(html);
+    } else {
+        errorDiv.textContent = '';
+    }
+});
+
+// Handle form submit
+var form = document.getElementById('payment-form');
+
+form.addEventListener('submit', async function(ev) {
+    ev.preventDefault();
+    
+    // Disable form elements
+    paymentElement.update({ readOnly: true });
+    $('#submit-button').attr('disabled', true);
+    
+    // Confirm the payment
+    const {error, paymentIntent} = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+            return_url: window.location.origin + '/checkout/success/',
+        },
+        redirect: 'if_required'
+    });
+    
+    if (error) {
+        // Show error to customer
+        var errorDiv = document.getElementById('card-errors');
+        var html = `
+            <span class="icon" role="alert">
+                <i class="fas fa-times"></i>
+            </span>
+            <span>${error.message}</span>
+        `;
+        $(errorDiv).html(html);
+        
+        // Re-enable form elements
+        paymentElement.update({ readOnly: false });
+        $('#submit-button').attr('disabled', false);
+    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+        // Payment succeeded, submit the form
+        form.submit();
+    }
+});
