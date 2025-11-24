@@ -28,16 +28,29 @@
             <p class="text-black">A confirmation email will be sent to: <strong>{{order.email}}</strong></p>
         </div>
     </div>
+{% comment %} itemise each bag item {% endcomment %}
+    {% for item in order.lineitems.all %}
     <div class="row">
         <div class="col-12 col-lg-7">
-
+            <hr>
+            <p>{{item.quantity}} || {{item.product.name}}
+                {% if item.product_size %} - Size {{item.product_size|upper}} 
+                {% endif %}
+            </p>            
         </div>
-        <div class="row">
-            <div class="col-12 col-lg-7 text-right">
-                <a href="{% url 'products' %}?category=new_arrivals,deals,clearance" class="btn btn-black rounded-0 my-2">
-                    
-                </a>
-            </div>
+    </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-12 col-lg-5">
+            <p><strong>{{order.order_number}}</strong> derp</p>
+            <br>
+            <p>Total: <strong>{{order.order_total}}</strong></p>
+        </div>
+        <div class="col-12 col-lg-7 text-right">
+            <a href="{% url 'products' %}?category=new_arrivals,deals,clearance" class="btn btn-black rounded-0 my-2">
+                Keep shopping
+            </a>
         </div>
     </div>
 </div>
