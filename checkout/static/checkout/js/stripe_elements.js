@@ -59,31 +59,46 @@ form.addEventListener('submit', async function(ev) {
     paymentElement.update({ readOnly: true });
     $('#submit-button').attr('disabled', true);
     
-    // Confirm the payment
-    const {error, paymentIntent} = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-            return_url: window.location.origin + '/checkout/success/',
-        },
-        redirect: 'if_required'
-    });
+    // Get form data
+    var saveInfo = Boolean($('#id-save-info').attr('checked'));
+    var csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+    var postData = {
+        'csrfmiddlewaretoken': csrfToken,
+        'client_secret': clientSecret,
+        'save_info': saveInfo,
+    };
+    var url = '/checkout/cache_checkout_data/';
     
-    if (error) {
-        // Show error to customer
-        var errorDiv = document.getElementById('card-errors');
-        var html = `
-            <span class="icon" role="alert">
-                <i class="fas fa-times"></i>
-            </span>
-            <span>${error.message}</span>
-        `;
-        $(errorDiv).html(html);
+    // Cache checkout data before confirming payment
+    $.post(url, postData).done(async function() {
+        // Confirm the payment
+        const {error, paymentIntent} = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.origin + '/checkout/success/',
+            },
+            redirect: 'if_required'
+        });
         
-        // Re-enable form elements
-        paymentElement.update({ readOnly: false });
-        $('#submit-button').attr('disabled', false);
-    } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-        // Payment succeeded, submit the form
-        form.submit();
-    }
+        if (error) {
+            // Show error to customer
+            var errorDiv = document.getElementById('card-errors');
+            var html = `
+                <span class="icon" role="alert">
+                    <i class="fas fa-times"></i>
+                </span>
+                <span>${error.message}</span>
+            `;
+            $(errorDiv).html(html);
+            
+            // Re-enable form elements
+            paymentElement.update({ readOnly: false });
+            $('#submit-button').attr('disabled', false);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            // Payment succeeded, submit the form
+            form.submit();
+        }
+    }).fail(function() {
+        location.reload();
+    });
 });

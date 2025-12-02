@@ -31,7 +31,10 @@ STRIPE_WH_SECRET = os.getenv('STRIPE_WH_SECRET','')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1', # vs code preview
+    'localhost', # listen for stripe webhooks
+]
 
 
 # Application definition
