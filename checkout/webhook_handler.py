@@ -3,6 +3,8 @@ from .models import Order, OrderLineItem
 from products.models import Product
 import json
 import time
+import stripe
+from django.conf import settings
 
 
 class StripeWH_Handler:
@@ -32,9 +34,24 @@ class StripeWH_Handler:
         save_info = intent.metadata.save_info
 
         # Get billing/shipping from PaymentIntent
-        billing_details = intent.charges.data[0].billing_details
+        # Use the latest_charge to get billing details
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+
+        # Retrieve the charge to get billing details
+        charge = None
+        if intent.latest_charge:
+            charge = stripe.Charge.retrieve(intent.latest_charge)
+            billing_details = charge.billing_details
+        else:
+            billing_details = None
+
         shipping_details = intent.shipping
-        grand_total = round(intent.charges.data[0].amount / 100, 2)
+        grand_total = round(intent.amount / 100, 2)
+
+        # Clean data in the shipping details
+        for field, value in shipping_details.address.items():
+            if value == "":
+                shipping_details.address[field] = None
 
         # Check if order exists
         order_exists = False
@@ -43,7 +60,7 @@ class StripeWH_Handler:
             try:
                 order = Order.objects.get(
                     full_name__iexact=shipping_details.name,
-                    email__iexact=billing_details.email,
+                    email__iexact=billing_details.email if billing_details else shipping_details.name,
                     phone_number__iexact=shipping_details.phone,
                     country__iexact=shipping_details.address.country,
                     postcode__iexact=shipping_details.address.postal_code,
@@ -71,7 +88,7 @@ class StripeWH_Handler:
             try:
                 order = Order.objects.create(
                     full_name=shipping_details.name,
-                    email=billing_details.email,
+                    email=billing_details.email if billing_details else shipping_details.name,
                     phone_number=shipping_details.phone,
                     country=shipping_details.address.country,
                     postcode=shipping_details.address.postal_code,

@@ -71,11 +71,23 @@ form.addEventListener('submit', async function(ev) {
     
     // Cache checkout data before confirming payment
     $.post(url, postData).done(async function() {
-        // Confirm the payment
+        // Confirm the payment with shipping details
         const {error, paymentIntent} = await stripe.confirmPayment({
             elements,
             confirmParams: {
                 return_url: window.location.origin + '/checkout/success/',
+                shipping: {
+                    name: $.trim($('#id_full_name').val()),
+                    phone: $.trim($('#id_phone_number').val()),
+                    address: {
+                        line1: $.trim($('#id_street_address1').val()),
+                        line2: $.trim($('#id_street_address2').val()),
+                        city: $.trim($('#id_town_or_city').val()),
+                        state: $.trim($('#id_county').val()),
+                        postal_code: $.trim($('#id_postcode').val()),
+                        country: $.trim($('#id_country').val()),
+                    }
+                }
             },
             redirect: 'if_required'
         });
