@@ -32,20 +32,29 @@ class StripeWH_Handler:
         pid = intent.id
         bag = intent.metadata.bag
         save_info = intent.metadata.save_info
+        email = intent.metadata.email  # Get email from metadata
 
         # Get billing/shipping from PaymentIntent
-        # Use the latest_charge to get billing details
         stripe.api_key = settings.STRIPE_SECRET_KEY
 
-        # Retrieve the charge to get billing details
-        charge = None
+        # Retrieve the charge to get billing details (optional now)
+        billing_details = None
         if intent.latest_charge:
-            charge = stripe.Charge.retrieve(intent.latest_charge)
-            billing_details = charge.billing_details
-        else:
-            billing_details = None
+            try:
+                charge = stripe.Charge.retrieve(intent.latest_charge)
+                billing_details = charge.billing_details
+            except Exception as e:
+                pass
 
         shipping_details = intent.shipping
+        
+        # Validate shipping details exist
+        if not shipping_details:
+            return HttpResponse(
+                content=f"Webhook received: {event['type']} | ERROR: No shipping details",
+                status=400
+            )
+            
         grand_total = round(intent.amount / 100, 2)
 
         # Clean data in the shipping details
@@ -60,7 +69,7 @@ class StripeWH_Handler:
             try:
                 order = Order.objects.get(
                     full_name__iexact=shipping_details.name,
-                    email__iexact=billing_details.email if billing_details else shipping_details.name,
+                    email__iexact=email,  # Use metadata email
                     phone_number__iexact=shipping_details.phone,
                     country__iexact=shipping_details.address.country,
                     postcode__iexact=shipping_details.address.postal_code,
@@ -88,7 +97,7 @@ class StripeWH_Handler:
             try:
                 order = Order.objects.create(
                     full_name=shipping_details.name,
-                    email=billing_details.email if billing_details else shipping_details.name,
+                    email=email,  # Use metadata email
                     phone_number=shipping_details.phone,
                     country=shipping_details.address.country,
                     postcode=shipping_details.address.postal_code,

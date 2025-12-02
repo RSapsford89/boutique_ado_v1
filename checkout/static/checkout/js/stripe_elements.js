@@ -66,6 +66,7 @@ form.addEventListener('submit', async function(ev) {
         'csrfmiddlewaretoken': csrfToken,
         'client_secret': clientSecret,
         'save_info': saveInfo,
+        'email': $.trim($('#id_email').val()),  // Changed from form.email.value
     };
     var url = '/checkout/cache_checkout_data/';
     
@@ -75,7 +76,7 @@ form.addEventListener('submit', async function(ev) {
         const {error, paymentIntent} = await stripe.confirmPayment({
             elements,
             confirmParams: {
-                return_url: window.location.origin + '/checkout/success/',
+                // Remove return_url completely
                 shipping: {
                     name: $.trim($('#id_full_name').val()),
                     phone: $.trim($('#id_phone_number').val()),
@@ -93,7 +94,7 @@ form.addEventListener('submit', async function(ev) {
         });
         
         if (error) {
-            // Show error to customer
+            // Show error
             var errorDiv = document.getElementById('card-errors');
             var html = `
                 <span class="icon" role="alert">
@@ -102,12 +103,15 @@ form.addEventListener('submit', async function(ev) {
                 <span>${error.message}</span>
             `;
             $(errorDiv).html(html);
-            
-            // Re-enable form elements
             paymentElement.update({ readOnly: false });
             $('#submit-button').attr('disabled', false);
         } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-            // Payment succeeded, submit the form
+            // Add client_secret and submit form
+            var hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'client_secret');
+            hiddenInput.setAttribute('value', clientSecret);
+            form.appendChild(hiddenInput);
             form.submit();
         }
     }).fail(function() {

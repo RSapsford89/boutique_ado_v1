@@ -33,10 +33,8 @@ def checkout(request):
         order_form = OrderForm(form_data)
         if order_form.is_valid():
             order = order_form.save(commit=False)
-            pid = request.POST.get('client_secret')
-            if pid:
-                pid = pid.split('_secret')[0]
-                order.stripe_pid = pid
+            pid = request.POST.get('client_secret', '').split('_secret')[0] if request.POST.get('client_secret') else ''
+            order.stripe_pid = pid
             order.original_bag = json.dumps(bag)
             order.save()
             for item_id, item_data in bag.items():
@@ -130,6 +128,7 @@ def cache_checkout_data(request):
             'bag': json.dumps(request.session.get('bag', {})),
             'save_info': request.POST.get('save_info'),
             'username': request.user,
+            'email': request.POST.get('email',''),
         })
         return HttpResponse(status=200)
     except Exception as e:
