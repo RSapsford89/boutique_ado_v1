@@ -106,6 +106,14 @@ form.addEventListener('submit', async function(ev) {
             paymentElement.update({ readOnly: false });
             $('#submit-button').attr('disabled', false);
         } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            var errorDiv = document.getElementById('card-errors');
+            var html = `
+                <span class="icon text-success" role="alert">
+                    <i class="fas fa-check-cirlce"></i>
+                </span>
+                <span class="text-success">Payment successful, processing order</span>
+            `;
+            $(errorDiv).html(html);
             // Add client_secret and submit form
             var hiddenInput = document.createElement('input');
             hiddenInput.setAttribute('type', 'hidden');
